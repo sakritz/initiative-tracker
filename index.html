@@ -121,6 +121,10 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
 .btn-add-full:hover{border-color:var(--accent-dim);color:var(--accent);background:var(--accent-bg);}
 .btn-start-full{width:100%;padding:10px;border-radius:3px;border:none;background:var(--accent);color:#0d0a04;font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;}
 .btn-start-full:active{filter:brightness(.88);}
+.btn-roster-full,.btn-demo-full{width:100%;padding:10px 14px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--text-mid);font-size:13px;font-weight:500;cursor:pointer;transition:var(--trans);text-align:left;}
+.btn-roster-full:hover,.btn-demo-full:hover{border-color:var(--accent-dim);color:var(--accent);background:var(--accent-bg);}
+.btn-danger-full{width:100%;padding:10px 14px;border-radius:5px;border:1px solid var(--red-dim);background:transparent;color:var(--red);font-size:12px;font-weight:500;cursor:pointer;transition:var(--trans);text-align:left;opacity:.7;}
+.btn-danger-full:hover{background:#c0392b0d;opacity:1;}
 .ql-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px;}
 .ql-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:3px;border:1px solid transparent;}
 .ql-row.active{background:var(--accent-bg);border-color:var(--border2);}
@@ -596,10 +600,8 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <div class="round-info" id="roundInfo" style="display:none;">Runde <b id="roundNum">1</b></div>
     <div class="topbar-right">
       <div class="sync-dot" id="syncDot" title="Sync-Status"></div>
-      <button class="top-btn" id="rosterBtn">📋 <span>Roster</span></button>
-      <button class="top-btn" id="saveLoadBtn">💾 <span>Save</span></button>
-      <button class="top-btn" id="demoBtn">🎲 <span>Demo</span></button>
       <button class="top-btn present" id="presentBtn" style="display:none;">⬛ <span>Presentation</span></button>
+      <button class="top-btn icon-only" id="saveLoadBtn" title="Export / Import">💾</button>
       <button class="top-btn icon-only" id="themeBtn">🌙</button>
       <button class="top-btn icon-only" id="langBtn" title="Switch language">🇩🇪</button>
       <button class="top-btn icon-only" id="overlayBtn" title="Overlay">⧉</button>
@@ -634,10 +636,16 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
         <div class="hint-small">← → · Leertaste · Wischen</div>
       </div>
     </div>
-    <div id="idleActions" style="display:flex;flex-direction:column;gap:6px;">
+    <div id="idleActions" style="display:flex;flex-direction:column;gap:10px;">
       <button class="btn-add-full" id="addBtn">+ Add Character</button>
       <button class="btn-start-full" id="startBtn" style="display:none;">▶ Start Combat</button>
+      <button class="btn-roster-full" id="rosterBtn">📋 <span id="rosterBtnLabel">Roster</span></button>
+      <button class="btn-demo-full" id="demoBtn">🎲 <span id="demoBtnLabel">Load Demo</span></button>
+      <button class="btn-demo-full" id="exportBtn2">⬇️ <span id="exportBtn2Label">Export</span></button>
+      <button class="btn-demo-full" id="importTrigger2">⬆️ <span id="importTrigger2Label">Import</span></button>
+      <input type="file" id="importFile2" accept=".json" style="display:none;"/>
     </div>
+    <button class="btn-danger-full" id="clearAllBtn2" style="margin-top:10px;">🗑 <span id="clearAllBtn2Label">Clear all</span></button>
     <div id="battleAdd" style="display:none;">
       <button class="btn-add-full" id="addBtnBattle">+ Add Character</button>
     </div>
@@ -756,13 +764,12 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
   <div class="save-sheet">
     <div class="save-handle"></div>
     <div class="save-body">
-      <div class="save-title">Save & Load</div>
+      <div class="save-title" id="saveTitle">Export / Import</div>
       <div class="save-desc" id="saveDesc">Export or import JSON. Images are included.</div>
       <div class="save-actions">
         <button class="save-btn" id="exportBtn"><span class="save-icon">⬇️</span><div class="save-btn-inner"><span class="save-label" id="exportLabel">Export</span><span class="save-sub" id="exportSub">Download JSON file</span></div></button>
         <button class="save-btn" id="importTrigger"><span class="save-icon">⬆️</span><div class="save-btn-inner"><span class="save-label" id="importLabel">Import</span><span class="save-sub" id="importSub">Load JSON file</span></div></button>
         <input type="file" id="importFile" accept=".json" style="display:none;"/>
-        <button class="save-btn danger" id="clearAllBtn"><span class="save-icon">🗑</span><div class="save-btn-inner"><span class="save-label" id="clearAllLabel">Clear all</span><span class="save-sub" id="clearAllSubEl">Remove all entries</span></div></button>
       </div>
     </div>
   </div>
@@ -1061,7 +1068,8 @@ const TRANSLATIONS={
     manage:'Manage',loadIntoCombat:'Load into Combat',
     noRosterEntries:'No entries yet.<br/>Click "+ New" to add characters.',
     cancel:'Cancel',loadSelected:'Load Selected',
-    saveLoad:'Save & Load',clearAll:'Clear all',clearAllSub:'Remove all entries',
+    saveLoad:'Export / Import',clearAll:'Clear all',clearAllSub:'Remove all entries',
+    roster:'Roster',loadDemo:'Load Demo',
     addCharacterTitle:'Add Character',editCharacterTitle:'Edit Character',
     rosterNew:'Roster – New Character',rosterEdit:'Roster – Edit',
     demoLoaded:'Demo loaded – 12 entries',
@@ -1111,7 +1119,8 @@ const TRANSLATIONS={
     manage:'Verwalten',loadIntoCombat:'In Kampf laden',
     noRosterEntries:'Noch keine Einträge.<br/>Klicke „+ Neu" um Charaktere anzulegen.',
     cancel:'Abbrechen',loadSelected:'Ausgewählte laden',
-    saveLoad:'Speichern & Laden',clearAll:'Alles löschen',clearAllSub:'Alle Einträge entfernen',
+    saveLoad:'Export / Import',clearAll:'Alles löschen',clearAllSub:'Alle Einträge entfernen',
+    roster:'Roster',loadDemo:'Demo laden',
     addCharacterTitle:'Charakter hinzufügen',editCharacterTitle:'Charakter bearbeiten',
     rosterNew:'Roster – Neuer Charakter',rosterEdit:'Roster – Bearbeiten',
     demoLoaded:'Demo geladen – 12 Einträge',
@@ -1161,8 +1170,6 @@ function setLang(l){
 function applyLang(){
   // flag shows the CURRENT language (click to switch)
   document.getElementById('langBtn').textContent=lang==='en'?'🇬🇧':'🇩🇪';
-  document.querySelector('#saveLoadBtn span').textContent=t('save');
-  document.querySelector('#demoBtn span').textContent=t('demo');
   const pb=document.querySelector('#presentBtn span');if(pb)pb.textContent=t('presentation');
   document.getElementById('encounterNameWrap').title=t('clickToEdit');
   document.getElementById('addBtn').textContent=t('addCharacter');
@@ -1173,7 +1180,11 @@ function applyLang(){
   document.getElementById('tabLoad').textContent=t('loadIntoCombat');
   document.getElementById('rosterCancelLoad').textContent=t('cancel');
   document.getElementById('rosterLoadBtn').textContent=t('loadSelected');
-  document.getElementById('rosterAddBtn').textContent=t('rosterNew2');
+  document.getElementById('rosterBtnLabel').textContent=t('roster');
+  document.getElementById('demoBtnLabel').textContent=t('loadDemo');
+  document.getElementById('exportBtn2Label').textContent=t('export');
+  document.getElementById('importTrigger2Label').textContent=t('import');
+  document.getElementById('clearAllBtn2Label').textContent=t('clearAllLabel');
   document.getElementById('ovIdle').textContent=t('noActiveCombat');
   document.getElementById('listHeader').textContent=t('listHeader');
   document.getElementById('currentTurnLabel').textContent=t('currentTurn');
@@ -1187,7 +1198,7 @@ function applyLang(){
   document.getElementById('importSub').textContent=t('importSub');
   document.getElementById('clearAllLabel').textContent=t('clearAllLabel');
   document.getElementById('clearAllSubEl').textContent=t('clearAllSubLabel');
-  document.querySelector('.save-title').textContent=t('saveLoad');
+  document.getElementById('saveTitle').textContent=t('saveLoad');
   document.getElementById('saveDesc').textContent=t('saveDesc');
   const noMsg=document.getElementById('noEntriesMsg');
   if(noMsg)noMsg.innerHTML=t('noEntries');
@@ -1523,15 +1534,18 @@ function openSaveSheet(){document.getElementById('saveOverlay').classList.add('o
 function closeSaveSheet(){document.getElementById('saveOverlay').classList.remove('open');}
 document.getElementById('saveLoadBtn').addEventListener('click',openSaveSheet);
 document.getElementById('saveOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('saveOverlay'))closeSaveSheet();});
-document.getElementById('exportBtn').addEventListener('click',()=>{
+document.getElementById('exportBtn').addEventListener('click',doExport);
+document.getElementById('exportBtn2').addEventListener('click',doExport);
+function doExport(){
   const blob=new Blob([JSON.stringify({version:1,entries,currentIdx,round,started},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`initiative_${new Date().toISOString().slice(0,10)}.json`;a.click();
   closeSaveSheet();showToast(t('exported'));
-});
+}
 document.getElementById('importTrigger').addEventListener('click',()=>document.getElementById('importFile').click());
-document.getElementById('importFile').addEventListener('change',e=>{
-  const f=e.target.files[0];if(!f)return;
+document.getElementById('importTrigger2').addEventListener('click',()=>document.getElementById('importFile2').click());
+function doImport(file){
+  if(!file)return;
   const r=new FileReader();
   r.onload=ev=>{
     try{
@@ -1539,17 +1553,20 @@ document.getElementById('importFile').addEventListener('change',e=>{
       if(!Array.isArray(d.entries))throw 0;
       entries=d.entries.map(x=>({...x,hidden:!!x.hidden,icon:x.icon||null}));
       currentIdx=d.currentIdx||0;round=d.round||1;started=d.started||false;
-      // Reset sentAssets so all images from import get pushed to server
       Object.keys(sentAssets).forEach(k=>delete sentAssets[k]);
       closeSaveSheet();render();pushState();
       setTimeout(pushAssets,100);
       showToast(t('entriesLoaded',entries.length));
     }catch{showToast(t('loadError'));}
-  };r.readAsText(f);e.target.value='';
-});
-document.getElementById('clearAllBtn').addEventListener('click',()=>{
-  if(!confirm(t('clearAll')))return;
-  entries=[];started=false;currentIdx=0;round=1;stopTimer();updateEncounterName('Initiative Tracker');closeSaveSheet();render();pushState();showToast(t('cleared'));
+  };r.readAsText(file);
+}
+document.getElementById('importFile').addEventListener('change',e=>{doImport(e.target.files[0]);e.target.value='';});
+document.getElementById('importFile2').addEventListener('change',e=>{doImport(e.target.files[0]);e.target.value='';;});
+document.getElementById('clearAllBtn2').addEventListener('click',()=>{
+  if(!confirm(t('deleteConfirm')))return;
+  entries=[];started=false;currentIdx=0;round=1;stopTimer();
+  updateEncounterName('Initiative Tracker');
+  render();pushState();showToast(t('cleared'));
 });
 
 /* ─── MODE ─── */
@@ -1631,10 +1648,12 @@ function render(){
     renderCard(s);renderQL(s);
   }else{
     document.getElementById('currentCard').style.display='none';
-    document.getElementById('idleActions').style.display='';
+    document.getElementById('idleActions').style.display='flex';
     document.getElementById('battleAdd').style.display='none';
     document.getElementById('qlSection').style.display='none';
   }
+  // Clear all is always visible
+  document.getElementById('clearAllBtn2').style.display='';
   ml.querySelector('.entry.active')?.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
@@ -1800,6 +1819,8 @@ document.getElementById('presStage').addEventListener('click',e=>{
 /* keyboard */
 document.addEventListener('keydown',e=>{
   if(!started)return;
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
   if(['overlay','saveOverlay'].some(id=>document.getElementById(id).classList.contains('open')))return;
   if(e.key==='ArrowRight'||e.key===' '||e.key==='n'){e.preventDefault();nextTurn();}
   if(e.key==='ArrowLeft' ||e.key==='p')             {e.preventDefault();prevTurn();}
