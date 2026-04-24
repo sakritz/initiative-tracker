@@ -504,59 +504,64 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
   .pres-bottom-nav{display:none;}
 }
 
-/* ── OVERLAY MODE ── */
+/* ── OVERLAY MODE – responsive: wide=row, narrow=column ── */
 #overlayMode{
   display:none;
   flex-direction:row;
   align-items:center;
-  height:100vh;
-  overflow:hidden;
-  background:var(--bg);
-  padding:0 10px;
-  gap:8px;
+  width:100vw;height:100vh;
+  overflow:hidden;background:var(--bg);
+  padding:6px 10px;gap:8px;
 }
+#overlayMode.ov-vertical{flex-direction:column;padding:8px;}
+
 .ov-strip{
   display:flex;align-items:center;gap:6px;
-  flex:1;min-width:0;height:100%;
+  flex:1;min-width:0;min-height:0;
   overflow-x:auto;overflow-y:hidden;
-  scrollbar-width:thin;
-  scrollbar-color:var(--border2) transparent;
-  padding:8px 0;
+  scrollbar-width:thin;scrollbar-color:var(--border2) transparent;
+  padding:4px 0;
 }
-.ov-strip::-webkit-scrollbar{height:4px;}
+.ov-vertical .ov-strip{
+  flex-direction:column;overflow-x:hidden;overflow-y:auto;
+  align-items:stretch;padding:0 2px;
+}
+.ov-strip::-webkit-scrollbar{width:4px;height:4px;}
 .ov-strip::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.ov-idle{
-  font-size:12px;color:var(--text-dim);font-style:italic;white-space:nowrap;
-}
+.ov-idle{font-size:12px;color:var(--text-dim);font-style:italic;white-space:nowrap;}
+
 .ov-controls{
   display:flex;align-items:center;gap:5px;flex-shrink:0;
   padding-left:10px;border-left:1px solid var(--border2);
 }
-.ov-round{
-  font-family:'Cormorant SC',serif;font-size:15px;font-weight:600;
-  color:var(--accent);letter-spacing:1px;flex-shrink:0;padding:0 4px;
+.ov-vertical .ov-controls{
+  flex-direction:row;flex-wrap:wrap;justify-content:center;
+  padding-left:0;padding-top:8px;
+  border-left:none;border-top:1px solid var(--border2);
+  width:100%;
 }
-.ov-btn{
-  width:28px;height:28px;border-radius:4px;
-  border:1px solid var(--border2);background:transparent;
-  color:var(--text-mid);font-size:13px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
+.ov-round{font-family:'Cormorant SC',serif;font-size:15px;font-weight:600;color:var(--accent);letter-spacing:1px;flex-shrink:0;padding:0 4px;}
+.ov-btn{width:28px;height:28px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text-mid);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ov-btn:hover{border-color:var(--accent-dim);color:var(--accent);background:var(--accent-bg);}
 .ov-btn.primary{background:var(--accent);color:#0d0a04;border-color:transparent;font-size:16px;}
 .ov-btn.primary:hover{filter:brightness(1.1);}
 .ov-btn.exit{font-size:11px;color:var(--text-dim);}
 .ov-btn.exit:hover{border-color:var(--red-dim);color:var(--red);background:#c0392b0d;}
 
-/* pips – bigger */
+/* pips */
 .ov-pip{
   display:flex;flex-direction:column;align-items:center;gap:4px;
   padding:5px 8px;border-radius:8px;border:1px solid transparent;
   flex-shrink:0;transition:all .2s ease;min-width:80px;
 }
+.ov-vertical .ov-pip{
+  flex-direction:row;align-items:center;
+  min-width:0;width:100%;gap:8px;padding:5px 8px;
+}
 .ov-pip.active{background:var(--accent-bg);border-color:var(--accent-dim);}
 .ov-pip.past{opacity:.32;}
 .ov-pip.dead{opacity:.22;filter:grayscale(.8);}
+
 .ov-avatar{
   border-radius:8px;overflow:hidden;
   background:var(--surface2);border:1px solid var(--border2);
@@ -566,24 +571,36 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
   position:relative;flex-shrink:0;transition:all .2s;
 }
 .ov-pip.active .ov-avatar{width:100px;height:100px;font-size:36px;border-color:var(--accent-dim);}
+.ov-vertical .ov-avatar{width:44px;height:44px;font-size:18px;}
+.ov-vertical .ov-pip.active .ov-avatar{width:52px;height:52px;font-size:22px;}
 .ov-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
 .ov-avatar .av-icon{font-size:32px;line-height:1;}
 .ov-pip.active .ov-avatar .av-icon{font-size:48px;}
+.ov-vertical .ov-avatar .av-icon{font-size:20px;}
+.ov-vertical .ov-pip.active .ov-avatar .av-icon{font-size:26px;}
 .ov-dead-x{position:absolute;inset:0;border-radius:8px;background:rgba(192,57,43,.6);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;}
+
 .ov-name{font-size:10px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;text-align:center;line-height:1;}
 .ov-pip.active .ov-name{color:var(--accent);font-weight:500;font-size:12px;max-width:110px;}
-/* conditions under active pip */
+.ov-vertical .ov-name{text-align:left;max-width:none;flex:1;font-size:12px;}
+.ov-vertical .ov-pip.active .ov-name{font-size:14px;}
+
 .ov-conds{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:2px;max-width:120px;}
+.ov-vertical .ov-conds{justify-content:flex-start;margin-top:0;margin-left:0;max-width:none;flex:1;}
 .ov-cond{font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid var(--accent-dim);color:var(--accent);background:var(--accent-bg);white-space:nowrap;}
-/* condition edit button */
-.ov-cond-btn{
-  margin-top:3px;
-  padding:2px 10px;border-radius:3px;
-  border:1px solid var(--border2);background:transparent;
-  color:var(--text-dim);font-size:10px;cursor:pointer;
-  transition:var(--trans);white-space:nowrap;
-}
+.ov-cond-btn{margin-top:3px;padding:2px 10px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--text-dim);font-size:10px;cursor:pointer;transition:var(--trans);white-space:nowrap;}
 .ov-cond-btn:hover{border-color:var(--accent-dim);color:var(--accent);background:var(--accent-bg);}
+/* vertical: icon-only, sits below conditions in its own row */
+.ov-vertical .ov-cond-btn{
+  padding:3px 7px;font-size:12px;margin-top:0;
+}
+.ov-vertical .ov-cond-btn .ov-cond-text{display:none;}
+/* wrapper for name+conds+btn in vertical row */
+.ov-pip-info{display:contents;}
+.ov-vertical .ov-pip-info{
+  display:flex;flex-direction:column;flex:1;min-width:0;gap:3px;
+  justify-content:center;
+}
 </style>
 </head>
 <body>
@@ -899,6 +916,17 @@ let overlayActive=false;
 // Minimal = overlay mode (strip only)
 // Config = edit mode
 
+function enterOverlay_setup(){
+  // ResizeObserver: switch to vertical layout when window is taller than wide
+  if(window._ovResizeObserver)window._ovResizeObserver.disconnect();
+  window._ovResizeObserver=new ResizeObserver(entries=>{
+    const el=document.getElementById('overlayMode');
+    if(!el||el.style.display==='none')return;
+    const {width,height}=entries[0].contentRect;
+    el.classList.toggle('ov-vertical', height>width);
+  });
+  window._ovResizeObserver.observe(document.body);
+}
 function goFull(){
   // exit minimal if active
   if(overlayActive){
@@ -918,6 +946,10 @@ function goMinimal(){
   overlayActive=true;
   document.getElementById('editMode').style.display='none';
   document.getElementById('overlayMode').style.display='flex';
+  // check initial orientation
+  const el=document.getElementById('overlayMode');
+  el.classList.toggle('ov-vertical', window.innerHeight>window.innerWidth);
+  enterOverlay_setup();
   renderOverlay();pushState();
   updateModeToggleBtns();
 }
@@ -1004,9 +1036,11 @@ function renderOverlay(){
     if(isDead)      avInner+=`<div class="ov-dead-x">✕</div>`;
     pip.innerHTML=`
       <div class="ov-avatar" style="${avStyle}">${avInner}</div>
-      <div class="ov-name">${e.name.split(' ')[0]}</div>
-      ${isCurrent&&(e.conditions||[]).length?`<div class="ov-conds">${e.conditions.map(c=>`<span class="ov-cond">${c}</span>`).join('')}</div>`:''}
-      ${isCurrent?`<button class="ov-cond-btn" data-condid="${e.id}">${t('conditionsBtn')}</button>`:''}
+      <div class="ov-pip-info">
+        <div class="ov-name">${e.name.split(' ')[0]}</div>
+        ${isCurrent&&(e.conditions||[]).length?`<div class="ov-conds">${e.conditions.map(c=>`<span class="ov-cond">${c}</span>`).join('')}</div>`:''}
+        ${isCurrent?`<button class="ov-cond-btn" data-condid="${e.id}">✎<span class="ov-cond-text"> ${t('conditionsBtn').replace('✎ ','')}</span></button>`:''}
+      </div>
     `;
     if(isCurrent)requestAnimationFrame(()=>pip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}));
     strip.appendChild(pip);
