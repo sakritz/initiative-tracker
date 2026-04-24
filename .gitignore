@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (if you ever run server locally)
+node_modules/
+screenshots/node_modules/
+screenshots/node_modules/
+
+# Docker
+.env
+
+
+# Personal
+screenshots/demo-data.json 
+
+# Alles außer PNGs ignorieren
+screenshots/*
+!screenshots/*.png
