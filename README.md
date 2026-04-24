@@ -19,8 +19,9 @@ A self-hosted, browser-based initiative tracker for D&D 5e — built as a single
 - **Light/dark mode**
 - **Self-hosted** — no external services, all data stays on your network
 
+
 <div align="center">
-  <img src="screenshoots/02-edit_data.png" width="48%"/>
+  <img src="screenshots/02-edit_data.png" width="48%"/>
   <img src="screenshots/04-presentation-conditions.png" width="48%"/>
 </div>
 
