@@ -600,11 +600,9 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <div class="round-info" id="roundInfo" style="display:none;">Runde <b id="roundNum">1</b></div>
     <div class="topbar-right">
       <div class="sync-dot" id="syncDot" title="Sync-Status"></div>
-      <button class="top-btn present" id="presentBtn" style="display:none;">⬛ <span>Presentation</span></button>
       <button class="top-btn icon-only" id="saveLoadBtn" title="Export / Import">💾</button>
       <button class="top-btn icon-only" id="themeBtn">🌙</button>
       <button class="top-btn icon-only" id="langBtn" title="Switch language">🇩🇪</button>
-      <button class="top-btn icon-only" id="overlayBtn" title="Overlay">⧉</button>
     </div>
   </header>
 
@@ -638,13 +636,13 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     </div>
     <div id="idleActions" style="display:flex;flex-direction:column;gap:10px;">
       <button class="btn-add-full" id="addBtn">+ Add Character</button>
-      <button class="btn-start-full" id="startBtn" style="display:none;">▶ Start Combat</button>
       <button class="btn-roster-full" id="rosterBtn">📋 <span id="rosterBtnLabel">Roster</span></button>
       <button class="btn-demo-full" id="demoBtn">🎲 <span id="demoBtnLabel">Load Demo</span></button>
       <button class="btn-demo-full" id="exportBtn2">⬇️ <span id="exportBtn2Label">Export</span></button>
       <button class="btn-demo-full" id="importTrigger2">⬆️ <span id="importTrigger2Label">Import</span></button>
       <input type="file" id="importFile2" accept=".json" style="display:none;"/>
     </div>
+    <button class="btn-start-full" id="startBtn" style="display:none;margin-top:10px;">▶ Start Combat</button>
     <button class="btn-danger-full" id="clearAllBtn2" style="margin-top:10px;">🗑 <span id="clearAllBtn2Label">Clear all</span></button>
     <div id="battleAdd" style="display:none;">
       <button class="btn-add-full" id="addBtnBattle">+ Add Character</button>
@@ -686,12 +684,13 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
       <button class="pres-icon-btn" id="presPrevBtn" title="Zurück">←</button>
       <button class="pres-icon-btn primary" id="presNextBtn" title="Weiter">→</button>
       <button class="pres-icon-btn" id="presCondBtn" title="Conditions (C)">✎</button>
-      <button class="pres-icon-btn danger" id="presExitBtn" title="Bearbeiten">✕</button>
+      <button class="pres-icon-btn" id="modeToggleBtn" title="Switch to Minimal">⊟</button>
+      <button class="pres-icon-btn danger" id="presExitBtn" title="Back to Config">✕</button>
     </div>
   </div>
   <div class="pres-stage" id="presStage">
     <div class="carousel-track" id="carouselTrack"></div>
-    <div class="pres-hint">Tippen · Wischen · ← →</div>
+    <div class="pres-hint">Tap · Swipe · ← →</div>
   </div>
   <!-- portrait bottom nav (hidden in landscape via CSS) -->
   <div class="pres-bottom-nav">
@@ -699,7 +698,8 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <span class="pres-round-portrait" id="presRound2">R 1</span>
     <button class="pres-icon-btn primary" id="presNextBtn2" title="Weiter">→</button>
     <button class="pres-icon-btn" id="presCondBtn2" title="Conditions">✎</button>
-    <button class="pres-icon-btn danger" id="presExitBtn2" title="Beenden">✕</button>
+    <button class="pres-icon-btn" id="modeToggleBtn2" title="Switch to Minimal">⊟</button>
+    <button class="pres-icon-btn danger" id="presExitBtn2" title="Back to Config">✕</button>
   </div>
 </div>
 
@@ -712,7 +712,8 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <div class="ov-round" id="ovRound">R —</div>
     <button class="ov-btn" id="ovPrevBtn" title="Zurück">←</button>
     <button class="ov-btn primary" id="ovNextBtn" title="Weiter">→</button>
-    <button class="ov-btn exit" id="ovExitBtn" title="Overlay verlassen">✕</button>
+    <button class="ov-btn" id="ovModeBtn" title="Switch to Full">⊞</button>
+    <button class="ov-btn exit" id="ovExitBtn" title="Back to Config">✕</button>
   </div>
 </div>
 
@@ -892,31 +893,64 @@ function avatarStyle(entry){
 }
 
 /* ─── OVERLAY MODE ─── */
-/* ─── OVERLAY MODE ─── */
+/* ─── MODE SWITCHING ─── */
 let overlayActive=false;
+// Full = presentation mode (carousel)
+// Minimal = overlay mode (strip only)
+// Config = edit mode
 
-function enterOverlay(){
+function goFull(){
+  // exit minimal if active
+  if(overlayActive){
+    overlayActive=false;
+    document.getElementById('overlayMode').style.display='none';
+  }
+  enterPresentation();
+  updateModeToggleBtns();
+}
+function goMinimal(){
+  // exit full if active
+  if(presenting){
+    presenting=false;
+    closeCondPanel();
+    document.getElementById('presentMode').style.display='none';
+  }
   overlayActive=true;
   document.getElementById('editMode').style.display='none';
-  document.getElementById('presentMode').style.display='none';
   document.getElementById('overlayMode').style.display='flex';
-  document.getElementById('overlayBtn').classList.add('present');
-  renderOverlay();
+  renderOverlay();pushState();
+  updateModeToggleBtns();
 }
-function exitOverlay(){
-  overlayActive=false;
-  document.getElementById('overlayMode').style.display='none';
-  document.getElementById('overlayBtn').classList.remove('present');
-  if(presenting){
-    document.getElementById('presentMode').style.display='flex';
-  } else {
+function goConfig(){
+  if(presenting){exitPresentation();}
+  if(overlayActive){
+    overlayActive=false;
+    document.getElementById('overlayMode').style.display='none';
     document.getElementById('editMode').style.display='grid';
-    render();
+    render();pushState();
   }
+  updateModeToggleBtns();
 }
-document.getElementById('overlayBtn').addEventListener('click',()=>{
-  if(overlayActive)exitOverlay(); else enterOverlay();
-});
+function updateModeToggleBtns(){
+  // In Full mode: toggle shows ⊟ Minimal
+  // In Minimal mode: toggle shows ⊞ Full
+  ['modeToggleBtn','modeToggleBtn2'].forEach(id=>{
+    const btn=document.getElementById(id);
+    if(btn){btn.textContent='⊟';btn.title='Switch to Minimal';}
+  });
+  const ovMode=document.getElementById('ovModeBtn');
+  if(ovMode){ovMode.textContent='⊞';ovMode.title='Switch to Full';}
+}
+
+// Wire mode toggle buttons (Full ↔ Minimal)
+document.getElementById('modeToggleBtn').addEventListener('click',goMinimal);
+document.getElementById('modeToggleBtn2').addEventListener('click',goMinimal);
+document.getElementById('ovModeBtn').addEventListener('click',goFull);
+
+// ✕ always goes back to Config
+document.getElementById('presExitBtn').addEventListener('click',goConfig);
+document.getElementById('presExitBtn2').addEventListener('click',goConfig);
+document.getElementById('ovExitBtn').addEventListener('click',goConfig);
 
 document.getElementById('ovNextBtn').addEventListener('click',()=>{
   const s=sorted();if(!s.length)return;
@@ -930,7 +964,7 @@ document.getElementById('ovPrevBtn').addEventListener('click',()=>{
   renderOverlay();pushState();
 });
 
-document.getElementById('ovExitBtn').addEventListener('click',exitOverlay);
+document.getElementById('ovExitBtn').addEventListener('click',goConfig);
 
 // Condition button in overlay opens the condition panel
 document.getElementById('ovStrip').addEventListener('click',e=>{
@@ -1170,7 +1204,6 @@ function setLang(l){
 function applyLang(){
   // flag shows the CURRENT language (click to switch)
   document.getElementById('langBtn').textContent=lang==='en'?'🇬🇧':'🇩🇪';
-  const pb=document.querySelector('#presentBtn span');if(pb)pb.textContent=t('presentation');
   document.getElementById('encounterNameWrap').title=t('clickToEdit');
   document.getElementById('addBtn').textContent=t('addCharacter');
   document.getElementById('addBtnBattle').textContent=t('addCharacter');
@@ -1196,8 +1229,6 @@ function applyLang(){
   document.getElementById('exportSub').textContent=t('exportSub');
   document.getElementById('importLabel').textContent=t('import');
   document.getElementById('importSub').textContent=t('importSub');
-  document.getElementById('clearAllLabel').textContent=t('clearAllLabel');
-  document.getElementById('clearAllSubEl').textContent=t('clearAllSubLabel');
   document.getElementById('saveTitle').textContent=t('saveLoad');
   document.getElementById('saveDesc').textContent=t('saveDesc');
   const noMsg=document.getElementById('noEntriesMsg');
@@ -1354,7 +1385,7 @@ function applyRemoteState(payload){
   started=payload.started||false;
   if(payload.encounterName)updateEncounterName(payload.encounterName);
   const shouldPresent=payload.presenting||false;
-  if(shouldPresent&&!presenting){
+  if(shouldPresent&&!presenting&&!overlayActive){
     presenting=true;
     document.getElementById('editMode').style.display='none';
     document.getElementById('presentMode').style.display='flex';
@@ -1570,10 +1601,9 @@ document.getElementById('clearAllBtn2').addEventListener('click',()=>{
 });
 
 /* ─── MODE ─── */
+// enterPresentation and exitPresentation kept as internal helpers
 function enterPresentation(){presenting=true;document.getElementById('editMode').style.display='none';document.getElementById('presentMode').style.display='flex';renderPresentation();pushState();}
 function exitPresentation(){presenting=false;closeCondPanel();document.getElementById('presentMode').style.display='none';document.getElementById('editMode').style.display='grid';render();pushState();}
-document.getElementById('presentBtn').addEventListener('click',enterPresentation);
-document.getElementById('presExitBtn').addEventListener('click',exitPresentation);
 
 /* ─── HIDE/SHOW ─── */
 function toggleHide(id){
@@ -1637,8 +1667,13 @@ function render(){
 
   document.getElementById('roundInfo').style.display=started?'':'none';
   document.getElementById('roundNum').textContent=round;
-  document.getElementById('startBtn').style.display=(!started&&s.length>0)?'':'none';
-  document.getElementById('presentBtn').style.display=(started||entries.length>0)?'':'none';
+  const startBtn=document.getElementById('startBtn');
+  if(s.length>0){
+    startBtn.style.display='';
+    startBtn.textContent=started?'▶ '+t('presentation'):'▶ '+t('startCombat');
+  } else {
+    startBtn.style.display='none';
+  }
 
   if(started&&s.length>0){
     document.getElementById('currentCard').style.display='';
@@ -1799,14 +1834,18 @@ document.getElementById('presPrevBtn').addEventListener('click',prevTurn);
 document.getElementById('presNextBtn2').addEventListener('click',nextTurn);
 document.getElementById('presPrevBtn2').addEventListener('click',prevTurn);
 document.getElementById('presCondBtn2').addEventListener('click',()=>{condPanelTarget=sorted()[currentIdx]?.id||entries[0]?.id||null;toggleCondPanel();});
-document.getElementById('presExitBtn2').addEventListener('click',exitPresentation);
-document.getElementById('endBtn').addEventListener('click',()=>{started=false;currentIdx=0;round=1;stopTimer();exitPresentation();render();pushState();});
+document.getElementById('presExitBtn2').addEventListener('click',goConfig);
+document.getElementById('endBtn').addEventListener('click',()=>{started=false;currentIdx=0;round=1;stopTimer();goConfig();});
 document.getElementById('startBtn').addEventListener('click',()=>{
   if(!sorted().length)return;
-  currentIdx=0;round=1;started=true;
-  startTimer();
-  render();pushState();
-  enterPresentation();
+  if(started){
+    goFull(); // already running, just go back to presentation
+  } else {
+    currentIdx=0;round=1;started=true;
+    startTimer();
+    render();pushState();
+    goFull();
+  }
 });
 
 document.getElementById('presStage').addEventListener('click',e=>{
@@ -1826,7 +1865,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft' ||e.key==='p')             {e.preventDefault();prevTurn();}
   if(e.key==='Escape'){
     if(document.getElementById('condPanel').classList.contains('open')){closeCondPanel();return;}
-    if(presenting)exitPresentation();
+    if(presenting)goConfig();
   }
   if((e.key==='c'||e.key==='C')&&presenting){condPanelTarget=sorted()[currentIdx]?.id||null;toggleCondPanel();}
 });
