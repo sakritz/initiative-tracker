@@ -597,19 +597,20 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <div class="topbar-right">
       <div class="sync-dot" id="syncDot" title="Sync-Status"></div>
       <button class="top-btn" id="rosterBtn">📋 <span>Roster</span></button>
-      <button class="top-btn" id="saveLoadBtn">💾 <span>Speichern</span></button>
+      <button class="top-btn" id="saveLoadBtn">💾 <span>Save</span></button>
       <button class="top-btn" id="demoBtn">🎲 <span>Demo</span></button>
-      <button class="top-btn present" id="presentBtn" style="display:none;">⬛ <span>Präsentation</span></button>
+      <button class="top-btn present" id="presentBtn" style="display:none;">⬛ <span>Presentation</span></button>
       <button class="top-btn icon-only" id="themeBtn">🌙</button>
-      <button class="top-btn icon-only" id="overlayBtn" title="Overlay-Modus">⧉</button>
+      <button class="top-btn icon-only" id="langBtn" title="Switch language">🇩🇪</button>
+      <button class="top-btn icon-only" id="overlayBtn" title="Overlay">⧉</button>
     </div>
   </header>
 
   <main class="main" id="mainList">
-    <div class="list-header">Initiative — absteigend sortiert</div>
+    <div class="list-header" id="listHeader">Initiative — sorted descending</div>
     <div class="empty" id="emptyState">
       <div class="empty-icon">⚔</div>
-      <p>Noch keine Teilnehmer.<br/>Füge Charaktere hinzu oder lade die Demo.</p>
+      <p id="noEntriesMsg">No participants yet.<br/>Add characters or load the demo.</p>
     </div>
   </main>
 
@@ -617,7 +618,7 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <div class="current-card" id="currentCard" style="display:none;">
       <div class="card-bar"></div>
       <div class="card-body">
-        <div class="card-eyebrow">Aktueller Zug</div>
+        <div class="card-eyebrow" id="currentTurnLabel">Current Turn</div>
         <div class="card-hero">
           <div class="card-avatar" id="cardAvatar"></div>
           <div><div class="card-name" id="cardName">—</div><div class="card-sub" id="cardSub">—</div></div>
@@ -634,14 +635,14 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
       </div>
     </div>
     <div id="idleActions" style="display:flex;flex-direction:column;gap:6px;">
-      <button class="btn-add-full" id="addBtn">+ Charakter hinzufügen</button>
-      <button class="btn-start-full" id="startBtn" style="display:none;">▶ Kampf starten</button>
+      <button class="btn-add-full" id="addBtn">+ Add Character</button>
+      <button class="btn-start-full" id="startBtn" style="display:none;">▶ Start Combat</button>
     </div>
     <div id="battleAdd" style="display:none;">
-      <button class="btn-add-full" id="addBtnBattle">+ Charakter hinzufügen</button>
+      <button class="btn-add-full" id="addBtnBattle">+ Add Character</button>
     </div>
     <div class="ql-section" id="qlSection" style="display:none;">
-      <div class="ql-label">Übersicht</div>
+      <div class="ql-label" id="overviewLabel">Overview</div>
       <div id="quickList"></div>
     </div>
   </aside>
@@ -655,15 +656,15 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <div style="display:flex;align-items:center;gap:10px;">
       <div class="pres-timers" id="presTimers" style="display:none;">
         <div class="pres-timer" id="presTurnTimer">
-          <span class="pres-timer-label">Zug</span>
+          <span class="pres-timer-label" id="timerTurnLabel">Turn</span>
           <span id="presTurnTime">0:00</span>
         </div>
         <div class="pres-timer" id="presRoundTimer">
-          <span class="pres-timer-label">Runde</span>
+          <span class="pres-timer-label" id="timerRoundLabel">Round</span>
           <span id="presRoundTime">0:00</span>
         </div>
         <div class="pres-timer" id="presTotalTimer">
-          <span class="pres-timer-label">Gesamt</span>
+          <span class="pres-timer-label" id="timerTotalLabel">Total</span>
           <span id="presTotalTime">0:00</span>
         </div>
       </div>
@@ -697,7 +698,7 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
 <!-- ═══ OVERLAY MODE ═══ -->
 <div id="overlayMode">
   <div class="ov-strip" id="ovStrip">
-    <div class="ov-idle" id="ovIdle">⚔ Kein aktiver Kampf</div>
+    <div class="ov-idle" id="ovIdle">⚔ No active combat</div>
   </div>
   <div class="ov-controls">
     <div class="ov-round" id="ovRound">R —</div>
@@ -717,13 +718,13 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <!-- dead toggle for selected char -->
     <div class="cp-hide-row" id="cpHideRow">
       <span class="cp-hide-label" id="cpHideLabel">—</span>
-      <button class="cp-hide-btn" id="cpHideBtn">† Tot markieren</button>
+      <button class="cp-hide-btn" id="cpHideBtn">† Mark as Dead</button>
     </div>
     <div>
       <div class="cp-label" style="margin-bottom:8px;">Conditions</div>
       <div class="cp-cond-row" id="cpCondRow"></div>
     </div>
-    <div class="cp-close-row"><button class="cp-close" id="cpClose">Fertig</button></div>
+    <div class="cp-close-row"><button class="cp-close" id="cpClose">Done</button></div>
   </div>
 </div>
 
@@ -734,18 +735,18 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
     <div class="roster-header">
       <div class="roster-title">Roster</div>
       <div class="roster-header-btns">
-        <button class="top-btn" id="rosterAddBtn" style="height:30px;font-size:11px;">+ Neu</button>
+        <button class="top-btn" id="rosterAddBtn" style="height:30px;font-size:11px;">+ New</button>
         <button class="top-btn icon-only" id="rosterCloseBtn" style="width:30px;height:30px;font-size:16px;">✕</button>
       </div>
     </div>
     <div class="roster-tabs">
-      <button class="roster-tab active" id="tabManage">Verwalten</button>
-      <button class="roster-tab" id="tabLoad">In Kampf laden</button>
+      <button class="roster-tab active" id="tabManage">Manage</button>
+      <button class="roster-tab" id="tabLoad">Load into Combat</button>
     </div>
     <div class="roster-body" id="rosterBody"></div>
     <div class="roster-footer" id="rosterFooter" style="display:none;">
-      <button class="btn-primary" id="rosterLoadBtn">Ausgewählte laden</button>
-      <button class="btn-cancel" id="rosterCancelLoad">Abbrechen</button>
+      <button class="btn-primary" id="rosterLoadBtn">Load Selected</button>
+      <button class="btn-cancel" id="rosterCancelLoad">Cancel</button>
     </div>
   </div>
 </div>
@@ -755,13 +756,13 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
   <div class="save-sheet">
     <div class="save-handle"></div>
     <div class="save-body">
-      <div class="save-title">Speichern & Laden</div>
-      <div class="save-desc">JSON exportieren oder laden. Bilder werden mit gespeichert.</div>
+      <div class="save-title">Save & Load</div>
+      <div class="save-desc" id="saveDesc">Export or import JSON. Images are included.</div>
       <div class="save-actions">
-        <button class="save-btn" id="exportBtn"><span class="save-icon">⬇️</span><div class="save-btn-inner"><span class="save-label">Exportieren</span><span class="save-sub">JSON-Datei herunterladen</span></div></button>
-        <button class="save-btn" id="importTrigger"><span class="save-icon">⬆️</span><div class="save-btn-inner"><span class="save-label">Importieren</span><span class="save-sub">JSON-Datei laden</span></div></button>
+        <button class="save-btn" id="exportBtn"><span class="save-icon">⬇️</span><div class="save-btn-inner"><span class="save-label" id="exportLabel">Export</span><span class="save-sub" id="exportSub">Download JSON file</span></div></button>
+        <button class="save-btn" id="importTrigger"><span class="save-icon">⬆️</span><div class="save-btn-inner"><span class="save-label" id="importLabel">Import</span><span class="save-sub" id="importSub">Load JSON file</span></div></button>
         <input type="file" id="importFile" accept=".json" style="display:none;"/>
-        <button class="save-btn danger" id="clearAllBtn"><span class="save-icon">🗑</span><div class="save-btn-inner"><span class="save-label">Alles löschen</span><span class="save-sub">Alle Einträge entfernen</span></div></button>
+        <button class="save-btn danger" id="clearAllBtn"><span class="save-icon">🗑</span><div class="save-btn-inner"><span class="save-label" id="clearAllLabel">Clear all</span><span class="save-sub" id="clearAllSubEl">Remove all entries</span></div></button>
       </div>
     </div>
   </div>
@@ -771,11 +772,11 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
 <div class="overlay" id="overlay">
   <div class="drawer">
     <div class="drawer-handle"></div>
-    <div class="drawer-title" id="drawerTitle">Charakter hinzufügen</div>
+    <div class="drawer-title" id="drawerTitle">Add Character</div>
     <div class="drawer-body">
-      <div class="field"><label>Name</label><input id="fName" type="text" placeholder="Thorin Eisenfaust…" autocomplete="off"/></div>
+      <div class="field"><label id="labelName">Name</label><input id="fName" type="text" placeholder="Thorin Ironfoot…" autocomplete="off"/></div>
       <div class="row2">
-        <div class="field"><label>Typ</label>
+        <div class="field"><label id="labelType">Type</label>
           <select id="fType">
             <option value="pc">⚔️ Player Character</option>
             <option value="npc">🧙 NPC</option>
@@ -783,32 +784,32 @@ input,textarea,select{font-family:inherit;transition:var(--trans);}
             <option value="effect">✨ Layer Effect</option>
           </select>
         </div>
-        <div class="field"><label>Initiative</label>
+        <div class="field"><label id="labelIni">Initiative</label>
           <div class="ini-row"><input id="fIni" type="number" inputmode="numeric" placeholder="15"/><button class="btn-roll" id="rollBtn">🎲</button></div>
         </div>
       </div>
-      <div class="field"><label>Farbe</label><div class="color-row" id="colorRow"></div></div>
+      <div class="field"><label id="labelColor">Color</label><div class="color-row" id="colorRow"></div></div>
 
       <!-- Icon picker (shown when no image) -->
       <div class="field" id="iconPickerField">
-        <label>Symbol (falls kein Bild)</label>
+        <label id="labelIcon">Icon (if no image)</label>
         <div class="icon-grid" id="iconGrid"></div>
       </div>
 
-      <div class="field"><label>Bild hochladen (überschreibt Symbol)</label>
+      <div class="field"><label id="labelImage">Upload image (overrides icon)</label>
         <div class="upload-row">
-          <button class="btn-upload" id="uploadBtn">📁 Hochladen</button>
+          <button class="btn-upload" id="uploadBtn">📁 Upload</button>
           <input type="file" id="fileInput" accept="image/*" style="display:none;"/>
           <img id="imgPreview" class="img-preview-thumb" style="display:none;" alt=""/>
           <button class="btn-remove-img" id="removeImg" style="display:none;">✕</button>
         </div>
       </div>
-      <div class="field"><label>Conditions</label><div class="cond-grid" id="condGrid"></div></div>
-      <div class="field"><label>Notizen (optional)</label><textarea id="fNotes" rows="2" placeholder="Infos, Besonderheiten…"></textarea></div>
+      <div class="field"><label id="labelConditions">Conditions</label><div class="cond-grid" id="condGrid"></div></div>
+      <div class="field"><label id="labelNotes">Notes (optional)</label><textarea id="fNotes" rows="2" placeholder="Info, special traits…"></textarea></div>
     </div>
     <div class="drawer-footer">
-      <button class="btn-primary" id="saveBtn">Hinzufügen</button>
-      <button class="btn-cancel" id="cancelBtn">Abbrechen</button>
+      <button class="btn-primary" id="saveBtn">Add</button>
+      <button class="btn-cancel" id="cancelBtn">Cancel</button>
     </div>
   </div>
 </div>
@@ -964,7 +965,7 @@ function renderOverlay(){
       <div class="ov-avatar" style="${avStyle}">${avInner}</div>
       <div class="ov-name">${e.name.split(' ')[0]}</div>
       ${isCurrent&&(e.conditions||[]).length?`<div class="ov-conds">${e.conditions.map(c=>`<span class="ov-cond">${c}</span>`).join('')}</div>`:''}
-      ${isCurrent?`<button class="ov-cond-btn" data-condid="${e.id}">✎ Conditions</button>`:''}
+      ${isCurrent?`<button class="ov-cond-btn" data-condid="${e.id}">${t('conditionsBtn')}</button>`:''}
     `;
     if(isCurrent)requestAnimationFrame(()=>pip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}));
     strip.appendChild(pip);
@@ -1046,8 +1047,181 @@ document.getElementById('timerToggleBtn').addEventListener('click',()=>{
   document.getElementById('timerToggleBtn').style.background=timerVisible?'var(--accent-bg)':'transparent';
 });
 
+/* ─── I18N ─── */
+const TRANSLATIONS={
+  en:{
+    save:'Save',demo:'Demo',presentation:'Presentation',
+    noEntries:'No participants yet.<br/>Add characters or load the demo.',
+    addCharacter:'+ Add Character',startCombat:'▶ Start Combat',
+    roundLabel:'Round',currentTurn:'Current Turn',
+    activeLabel:'Active',readyLabel:'Get Ready',
+    noActiveCombat:'⚔ No active combat',
+    characterLabel:'Character',conditionsLabel:'Conditions',
+    markDead:'† Mark as Dead',revive:'♻ Revive',done:'Done',
+    manage:'Manage',loadIntoCombat:'Load into Combat',
+    noRosterEntries:'No entries yet.<br/>Click "+ New" to add characters.',
+    cancel:'Cancel',loadSelected:'Load Selected',
+    saveLoad:'Save & Load',clearAll:'Clear all',clearAllSub:'Remove all entries',
+    addCharacterTitle:'Add Character',editCharacterTitle:'Edit Character',
+    rosterNew:'Roster – New Character',rosterEdit:'Roster – Edit',
+    demoLoaded:'Demo loaded – 12 entries',
+    exported:'Exported ✓',
+    entriesLoaded:(n)=>`${n} entries loaded ✓`,
+    loadError:'Error loading file',
+    cleared:'Cleared',
+    isDead:(n)=>`${n} is dead ✕`,
+    revived:(n)=>`${n} revived`,
+    added:(n)=>`${n} character${n!==1?'s':''} added`,
+    duplicated:(n)=>`${n} added`,
+    clickToEdit:'Click to edit',
+    deleteConfirm:'Delete?',
+    demoConfirm:'Load demo? Current entries will be replaced.',
+    saveToRoster:'Save to Roster',
+    conditionsBtn:'✎ Conditions',
+    noActiveConds:'No active conditions',
+    listHeader:'Initiative — sorted descending',
+    currentTurn:'Current Turn',
+    overview:'Overview',
+    timerTurn:'Turn',timerRound:'Round',timerTotal:'Total',
+    rosterNew2:'+ New',
+    export:'Export',exportSub:'Download JSON file',
+    import:'Import',importSub:'Load JSON file',
+    clearAllLabel:'Clear all',clearAllSubLabel:'Remove all entries',
+    roundInfo:'Round',
+    labelName:'Name',labelType:'Type',labelIni:'Initiative',
+    labelColor:'Color',labelIcon:'Icon (if no image)',
+    labelImage:'Upload image (overrides icon)',
+    labelConditions:'Conditions',labelNotes:'Notes (optional)',
+    labelUpload:'📁 Upload',
+    namePlaceholder:'Thorin Ironfoot…',
+    notesPlaceholder:'Info, special traits…',
+    noNotes:'No notes',
+    saveDesc:'Export or import JSON. Images are included.',
+    addBtn:'Add',
+  },
+  de:{
+    save:'Speichern',demo:'Demo',presentation:'Präsentation',
+    noEntries:'Noch keine Teilnehmer.<br/>Füge Charaktere hinzu oder lade die Demo.',
+    addCharacter:'+ Charakter hinzufügen',startCombat:'▶ Kampf starten',
+    roundLabel:'Runde',currentTurn:'Aktueller Zug',
+    activeLabel:'Aktiv',readyLabel:'Bereit machen',
+    noActiveCombat:'⚔ Kein aktiver Kampf',
+    characterLabel:'Charakter',conditionsLabel:'Conditions',
+    markDead:'† Tot markieren',revive:'♻ Wiederbeleben',done:'Fertig',
+    manage:'Verwalten',loadIntoCombat:'In Kampf laden',
+    noRosterEntries:'Noch keine Einträge.<br/>Klicke „+ Neu" um Charaktere anzulegen.',
+    cancel:'Abbrechen',loadSelected:'Ausgewählte laden',
+    saveLoad:'Speichern & Laden',clearAll:'Alles löschen',clearAllSub:'Alle Einträge entfernen',
+    addCharacterTitle:'Charakter hinzufügen',editCharacterTitle:'Charakter bearbeiten',
+    rosterNew:'Roster – Neuer Charakter',rosterEdit:'Roster – Bearbeiten',
+    demoLoaded:'Demo geladen – 12 Einträge',
+    exported:'Exportiert ✓',
+    entriesLoaded:(n)=>`${n} Einträge geladen ✓`,
+    loadError:'Fehler beim Laden',
+    cleared:'Gelöscht',
+    isDead:(n)=>`${n} ist tot ✕`,
+    revived:(n)=>`${n} wiederbeliebt`,
+    added:(n)=>`${n} Charakter${n!==1?'e':''} hinzugefügt`,
+    duplicated:(n)=>`${n} hinzugefügt`,
+    clickToEdit:'Klicken zum Bearbeiten',
+    deleteConfirm:'Löschen?',
+    demoConfirm:'Demo laden? Aktuelle Einträge werden ersetzt.',
+    saveToRoster:'Im Roster speichern',
+    conditionsBtn:'✎ Conditions',
+    noActiveConds:'Keine aktiven Conditions',
+    listHeader:'Initiative — absteigend sortiert',
+    currentTurn:'Aktueller Zug',
+    overview:'Übersicht',
+    timerTurn:'Zug',timerRound:'Runde',timerTotal:'Gesamt',
+    rosterNew2:'+ Neu',
+    export:'Exportieren',exportSub:'JSON-Datei herunterladen',
+    import:'Importieren',importSub:'JSON-Datei laden',
+    clearAllLabel:'Alles löschen',clearAllSubLabel:'Alle Einträge entfernen',
+    roundInfo:'Runde',
+    labelName:'Name',labelType:'Typ',labelIni:'Initiative',
+    labelColor:'Farbe',labelIcon:'Symbol (falls kein Bild)',
+    labelImage:'Bild hochladen (überschreibt Symbol)',
+    labelConditions:'Conditions',labelNotes:'Notizen (optional)',
+    labelUpload:'📁 Hochladen',
+    namePlaceholder:'Thorin Eisenfaust…',
+    notesPlaceholder:'Infos, Besonderheiten…',
+    noNotes:'Keine Notizen',
+    saveDesc:'JSON exportieren oder laden. Bilder werden mit gespeichert.',
+    addBtn:'Hinzufügen',
+  }
+};
+let lang=localStorage.getItem('ds_lang')||'en';
+const t=(key,...args)=>{
+  const val=TRANSLATIONS[lang][key]??TRANSLATIONS.en[key]??key;
+  return typeof val==='function'?val(...args):val;
+};
+function setLang(l){
+  lang=l;localStorage.setItem('ds_lang',l);applyLang();
+}
+function applyLang(){
+  // flag shows the CURRENT language (click to switch)
+  document.getElementById('langBtn').textContent=lang==='en'?'🇬🇧':'🇩🇪';
+  document.querySelector('#saveLoadBtn span').textContent=t('save');
+  document.querySelector('#demoBtn span').textContent=t('demo');
+  const pb=document.querySelector('#presentBtn span');if(pb)pb.textContent=t('presentation');
+  document.getElementById('encounterNameWrap').title=t('clickToEdit');
+  document.getElementById('addBtn').textContent=t('addCharacter');
+  document.getElementById('addBtnBattle').textContent=t('addCharacter');
+  const sb=document.getElementById('startBtn');if(sb)sb.textContent=t('startCombat');
+  document.getElementById('cpClose').textContent=t('done');
+  document.getElementById('tabManage').textContent=t('manage');
+  document.getElementById('tabLoad').textContent=t('loadIntoCombat');
+  document.getElementById('rosterCancelLoad').textContent=t('cancel');
+  document.getElementById('rosterLoadBtn').textContent=t('loadSelected');
+  document.getElementById('rosterAddBtn').textContent=t('rosterNew2');
+  document.getElementById('ovIdle').textContent=t('noActiveCombat');
+  document.getElementById('listHeader').textContent=t('listHeader');
+  document.getElementById('currentTurnLabel').textContent=t('currentTurn');
+  document.getElementById('overviewLabel').textContent=t('overview');
+  document.getElementById('timerTurnLabel').textContent=t('timerTurn');
+  document.getElementById('timerRoundLabel').textContent=t('timerRound');
+  document.getElementById('timerTotalLabel').textContent=t('timerTotal');
+  document.getElementById('exportLabel').textContent=t('export');
+  document.getElementById('exportSub').textContent=t('exportSub');
+  document.getElementById('importLabel').textContent=t('import');
+  document.getElementById('importSub').textContent=t('importSub');
+  document.getElementById('clearAllLabel').textContent=t('clearAllLabel');
+  document.getElementById('clearAllSubEl').textContent=t('clearAllSubLabel');
+  document.querySelector('.save-title').textContent=t('saveLoad');
+  document.getElementById('saveDesc').textContent=t('saveDesc');
+  const noMsg=document.getElementById('noEntriesMsg');
+  if(noMsg)noMsg.innerHTML=t('noEntries');
+  // drawer
+  document.getElementById('labelName').textContent=t('labelName');
+  document.getElementById('labelType').textContent=t('labelType');
+  document.getElementById('labelIni').textContent=t('labelIni');
+  document.getElementById('labelColor').textContent=t('labelColor');
+  document.getElementById('labelIcon').textContent=t('labelIcon');
+  document.getElementById('labelImage').textContent=t('labelImage');
+  document.getElementById('labelConditions').textContent=t('labelConditions');
+  document.getElementById('labelNotes').textContent=t('labelNotes');
+  document.getElementById('uploadBtn').textContent=t('labelUpload');
+  document.getElementById('fName').placeholder=t('namePlaceholder');
+  document.getElementById('fNotes').placeholder=t('notesPlaceholder');
+  document.getElementById('cancelBtn').textContent=t('cancel');
+  // saveBtn text depends on context - only set if drawer is closed
+  if(!document.getElementById('overlay').classList.contains('open')){
+    document.getElementById('saveBtn').textContent=t('addBtn');
+  }
+  // condition panel
+  const cpHide=document.getElementById('cpHideBtn');
+  if(cpHide){
+    const isDead=entries.find(x=>String(x.id)===String(condPanelTarget))?.hidden;
+    cpHide.textContent=isDead?t('revive'):t('markDead');
+  }
+  render();
+  if(presenting)renderPresentation();
+  if(overlayActive)renderOverlay();
+}
+
 /* ─── THEME ─── */
 let theme='dark';
+document.getElementById('langBtn').addEventListener('click',()=>setLang(lang==='en'?'de':'en'));
 document.getElementById('themeBtn').addEventListener('click',()=>{
   theme=theme==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',theme);
@@ -1223,7 +1397,7 @@ function renderRosterBody(){
   const body=document.getElementById('rosterBody');
   if(rosterTab==='manage'){
     if(!roster.length){
-      body.innerHTML=`<div class="roster-empty">Noch keine Einträge.<br/>Klicke „+ Neu" um Charaktere anzulegen.</div>`;
+      body.innerHTML=`<div class="roster-empty">${t('noRosterEntries')}</div>`;
       return;
     }
     body.innerHTML=roster.map(r=>`
@@ -1270,7 +1444,7 @@ document.getElementById('rosterBody').addEventListener('click',e=>{
   if(eb){ openRosterEdit(eb.dataset.id); return; }
   const db=e.target.closest('.roster-del-btn');
   if(db){
-    if(!confirm('Löschen?'))return;
+    if(!confirm(t('deleteConfirm')))return;
     roster=roster.filter(r=>String(r.id)!==String(db.dataset.id));
     saveRoster();renderRosterBody();return;
   }
@@ -1294,7 +1468,7 @@ document.getElementById('rosterAddBtn').addEventListener('click',()=>{
   document.getElementById('imgPreview').style.display='none';
   document.getElementById('removeImg').style.display='none';
   document.getElementById('saveBtn').textContent='Zum Roster hinzufügen';
-  openDrawer('Roster – Neuer Charakter');
+  openDrawer(t('rosterNew'));
 });
 
 function openRosterEdit(id){
@@ -1313,7 +1487,7 @@ function openRosterEdit(id){
     document.getElementById('imgPreview').style.display='';
     document.getElementById('removeImg').style.display='';
   }
-  document.getElementById('saveBtn').textContent='Speichern';
+  document.getElementById('saveBtn').textContent=t('save');
   buildColorRow();buildCondGrid();buildIconGrid(r.type);
   document.getElementById('overlay').classList.add('open');
   setTimeout(()=>document.getElementById('fName').focus(),300);
@@ -1334,14 +1508,14 @@ document.getElementById('rosterLoadBtn').addEventListener('click',()=>{
   });
   closeRoster();
   render();pushState();
-  showToast(`${added} Charakter${added!==1?'e':''} hinzugefügt`);
+  showToast(t('added',added));
 });
 
 /* ─── DEMO ─── */
 document.getElementById('demoBtn').addEventListener('click',()=>{
-  if(entries.length&&!confirm('Demo laden? Aktuelle Einträge werden ersetzt.'))return;
+  if(entries.length&&!confirm(t('demoConfirm')))return;
   entries=DEMO.map(d=>({...d,conditions:[...d.conditions]}));
-  started=false;currentIdx=0;round=1;render();pushState();showToast('Demo geladen – 12 Einträge');
+  started=false;currentIdx=0;round=1;render();pushState();showToast(t('demoLoaded'));
 });
 
 /* ─── SAVE/LOAD ─── */
@@ -1353,7 +1527,7 @@ document.getElementById('exportBtn').addEventListener('click',()=>{
   const blob=new Blob([JSON.stringify({version:1,entries,currentIdx,round,started},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`initiative_${new Date().toISOString().slice(0,10)}.json`;a.click();
-  closeSaveSheet();showToast('Exportiert ✓');
+  closeSaveSheet();showToast(t('exported'));
 });
 document.getElementById('importTrigger').addEventListener('click',()=>document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change',e=>{
@@ -1369,13 +1543,13 @@ document.getElementById('importFile').addEventListener('change',e=>{
       Object.keys(sentAssets).forEach(k=>delete sentAssets[k]);
       closeSaveSheet();render();pushState();
       setTimeout(pushAssets,100);
-      showToast(`${entries.length} Einträge geladen ✓`);
-    }catch{showToast('Fehler beim Laden');}
+      showToast(t('entriesLoaded',entries.length));
+    }catch{showToast(t('loadError'));}
   };r.readAsText(f);e.target.value='';
 });
 document.getElementById('clearAllBtn').addEventListener('click',()=>{
-  if(!confirm('Wirklich alles löschen?'))return;
-  entries=[];started=false;currentIdx=0;round=1;stopTimer();updateEncounterName('Initiative Tracker');closeSaveSheet();render();pushState();showToast('Gelöscht');
+  if(!confirm(t('clearAll')))return;
+  entries=[];started=false;currentIdx=0;round=1;stopTimer();updateEncounterName('Initiative Tracker');closeSaveSheet();render();pushState();showToast(t('cleared'));
 });
 
 /* ─── MODE ─── */
@@ -1391,7 +1565,7 @@ function toggleHide(id){
   const s=sorted();
   if(currentIdx>=s.length)currentIdx=Math.max(0,s.length-1);
   render();pushState();
-  showToast(entry.hidden?`${entry.name} ist tot ✕`:`${entry.name} wiederbeliebt`);
+  showToast(entry.hidden?t('isDead',entry.name):t('revived',entry.name));
 }
 
 /* ─── RENDER EDIT ─── */
@@ -1408,7 +1582,7 @@ function render(){
     const cls=isHidden?'hidden-entry':isCurrent?'active':isNext?'next-up':'dim';
     let rHTML='';
     if(!isHidden){
-      if(isCurrent)       rHTML=`<span class="status-badge badge-active">Aktiv</span>`;
+      if(isCurrent)       rHTML=`<span class="status-badge badge-active">${t('activeLabel')}</span>`;
       else if(isNext)     rHTML=`<span class="status-badge badge-next">Nächster</span>`;
       else if(started){const d=idx-currentIdx<0?s.length+idx-currentIdx:idx-currentIdx;rHTML=`<span class="pos-num">+${d}</span>`;}
     }
@@ -1426,7 +1600,7 @@ function render(){
       </div>
       <div class="entry-right">${rHTML}
         <div class="row-btns">
-          <button class="icon-btn hide-btn${entry.hidden?' is-hidden':''}" data-id="${entry.id}" title="${entry.hidden?'Wiederbeleben':'Als tot markieren'}">${entry.hidden?'♻️':'†'}</button>
+          <button class="icon-btn hide-btn${entry.hidden?' is-hidden':''}" data-id="${entry.id}" title="${entry.hidden?t('revive'):t('markDead')}">${entry.hidden?'♻️':'†'}</button>
           <button class="icon-btn dup-btn" data-id="${entry.id}" title="Duplizieren">⎘</button>
           <button class="icon-btn edit-btn" data-id="${entry.id}">✎</button>
           <button class="icon-btn del del-btn" data-id="${entry.id}">✕</button>
@@ -1475,9 +1649,9 @@ function renderCard(s){
   const cw=document.getElementById('cardConds');
   if((e.conditions||[]).length){
     cw.innerHTML=e.conditions.map(c=>`<span class="cond-tag">${c}<button class="cond-remove" data-id="${e.id}" data-cond="${c}">✕</button></span>`).join('');
-  }else{cw.innerHTML=`<span class="no-conds">Keine aktiven Conditions</span>`;}
+  }else{cw.innerHTML=`<span class="no-conds">${t('noActiveConds')}</span>`;}
   const nb=document.getElementById('cardNotes');
-  nb.innerHTML=(e.notes||'').trim()?e.notes:`<span style="opacity:.5;font-style:italic;">Keine Notizen</span>`;
+  nb.innerHTML=(e.notes||'').trim()?e.notes:`<span style="opacity:.5;font-style:italic;">${t('noNotes')}</span>`;
 }
 
 function renderQL(s){
@@ -1560,8 +1734,8 @@ function buildCarouselCard(track,e,cls,action,isActive,isNext,isDead){
     <div class="c-bar"></div>
     <div class="c-portrait" style="${pBg}">${portraitInner}
       ${deadOverlay}
-      ${isActive?'<div class="c-active-label">Aktiv</div>':''}
-      ${isNext?'<div class="c-next-label">Bereit machen</div>':''}
+      ${isActive?`<div class="c-active-label">${t('activeLabel')}</div>`:''}
+      ${isNext?`<div class="c-next-label">${t('readyLabel')}</div>`:''}
     </div>
     <div class="c-footer">
       <div class="c-name">${e.name}</div>
@@ -1667,7 +1841,7 @@ function dupEntry(id){
   const num=siblings.length+1;
   entries.push({...src,id:Date.now(),name:`${baseName} ${num}`,initiative:0,conditions:[],hidden:false});
   render();pushState();
-  showToast(`${baseName} ${num} hinzugefügt`);
+  showToast(t('duplicated',`${baseName} ${num}`));
 }
 function delEntry(id){
   entries=entries.filter(x=>String(x.id)!==String(id));
@@ -1705,7 +1879,7 @@ function updateHideRow(){
   const isDead=entry.hidden;
   lbl.className='cp-hide-label'+(isDead?' is-dead':'');
   lbl.innerHTML=isDead?`<span class="cp-dead-x">✕</span> ${entry.name}`:entry.name;
-  btn.textContent=isDead?'♻ Wiederbeleben':'† Tot markieren';
+  btn.textContent=isDead?t('revive'):t('markDead');
   btn.className='cp-hide-btn'+(isDead?' is-dead':'');
 }
 
@@ -1734,7 +1908,7 @@ document.getElementById('cpHideBtn').addEventListener('click',()=>{
   buildCondRow();
   renderPresentation();
   render();pushState();
-  showToast(entry.hidden?`${entry.name} ist tot ✕`:`${entry.name} wiederbelibt`);
+  showToast(entry.hidden?t('isDead',entry.name):t('revived',entry.name));
 });
 
 document.getElementById('cpCharRow').addEventListener('click',e=>{
@@ -1775,7 +1949,7 @@ function buildIconGrid(type){
     return `<button class="icon-opt${formIcon===ic?' selected':''}" data-icon="${ic}">${ic}</button>`;
   }).join('');
 }
-function openDrawer(title='Charakter hinzufügen'){
+function openDrawer(title=t('addCharacterTitle')){
   document.getElementById('drawerTitle').textContent=title;
   buildColorRow();buildCondGrid();buildIconGrid(document.getElementById('fType').value);
   document.getElementById('overlay').classList.add('open');
@@ -1799,8 +1973,8 @@ function openEdit(id){
   document.getElementById('fIni').value=e.initiative;
   document.getElementById('fNotes').value=e.notes||'';
   if(formImage){document.getElementById('imgPreview').src=formImage;document.getElementById('imgPreview').style.display='';document.getElementById('removeImg').style.display='';}
-  document.getElementById('saveBtn').textContent='Speichern';
-  openDrawer('Charakter bearbeiten');
+  document.getElementById('saveBtn').textContent=t('save');
+  openDrawer(t('editCharacterTitle'));
 }
 document.getElementById('addBtn').addEventListener('click',()=>openDrawer());
 document.getElementById('addBtnBattle').addEventListener('click',()=>openDrawer());
@@ -1883,7 +2057,8 @@ document.getElementById('saveBtn').addEventListener('click',()=>{
 });
 
 render();
-pushLocalStorage(); // initial write so overlay can read state immediately
+pushLocalStorage();
+applyLang(); // apply language on first load
 </script>
 </body>
 </html>
