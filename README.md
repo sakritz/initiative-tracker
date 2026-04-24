@@ -2,7 +2,7 @@
 
 A self-hosted, browser-based initiative tracker for D&D 5e — built as a single HTML file with an optional Node.js WebSocket server for real-time multi-device sync.
 
-![Dark mode screenshot](screenshots/Screenshot_Presentation%20Mode.jpg)
+![Dark mode screenshot](screenshots/03-presentation-full.png)
 
 ## Features
 
@@ -18,6 +18,11 @@ A self-hosted, browser-based initiative tracker for D&D 5e — built as a single
 - **JSON export/import** — save and reload sessions including character images
 - **Light/dark mode**
 - **Self-hosted** — no external services, all data stays on your network
+
+<div align="center">
+  <img src="screenshoots/02-edit_data.png" width="48%"/>
+  <img src="screenshots/04-presentation-conditions.png" width="48%"/>
+</div>
 
 ---
 
